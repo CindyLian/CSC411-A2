@@ -27,28 +27,45 @@ def display_Part1 ():
     show()    
 
 def Part2 (w, x, b):
-    o = np.matmul (w,x) + b
+    o = np.matmul (w,x.T) + b 
     p = exp (o)/np.sum (o)
+
     return o,p
 
-def cost (w,x,b):
+def cost (w,x,b,y):
     o,p = Part2 (w,x,b)
-    y = softmax (o)
-    cost = -sum (y*log(p))
+    cost = -sum (np.matmul(y,log(p)))
     return cost
     
-def cost_grad (w,x,b):
-    o = Part2 (w,x,b)
-    p = softmax(o)
-    
-    return np.matmul (x,(p-o))    
+def cost_grad (w,x,b,y):
+    o,p = Part2 (w,x,b)
+    return np.matmul (x.T,array(p-y).T)
 
-def grad_approx (w,x,b,h,p,q):
-    c = cost (w,x,b)
-    w[p][q] += h
+def grad_approx (w,x,b,h,p,q,y):
+    c = cost (w,x,b,y)
+    w[q][p] += h
+    new_c = cost (w,x,b,y)
     
-    return (cost(w,x,b)-c)/h
+    return (new_c-c)/h
+    
+def Part3b ():
+    x = np.copy (M["train0"])
+    w = [[0.00001 for i in xrange(784)] for i in xrange(10)]
+    b = [[0 for i in xrange(len(x))] for i in xrange(10)]
+    y = [[0 for i in xrange(10)] for i in xrange(len(x))]
+ 
+    for i in range (0, len(x)):
+        y[i][0] = 1
+    
+    grad = cost_grad (w,x,b,array(y).T)
 
+    h = 0.01
+    for i in range (0,5):
+        p = randint (0,4)
+        q = randint (0,4)
+        approx = grad_approx (w,x,b,h,p,q,y)
+        print ("%d, %d, %f, %f, %f" %(p, q, grad[p][q], approx, (grad[p][q]-approx)/grad[p][q]))
+    
 def softmax(y):
     '''Return the output of the softmax function for the matrix of output y. y
     is an NxM matrix where N is the number of outputs for a single case, and M
