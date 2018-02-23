@@ -26,6 +26,29 @@ def display_Part1 ():
             axarr[i,j].imshow(M[numbers[i]][j].reshape((28,28)), cmap=cm.gray)
     show()    
 
+def Part2 (w, x, b):
+    o = np.matmul (w,x) + b
+    p = exp (o)/np.sum (o)
+    return o,p
+
+def cost (w,x,b):
+    o,p = Part2 (w,x,b)
+    y = softmax (o)
+    cost = -sum (y*log(p))
+    return cost
+    
+def cost_grad (w,x,b):
+    o = Part2 (w,x,b)
+    p = softmax(o)
+    
+    return np.matmul (x,(p-o))    
+
+def grad_approx (w,x,b,h,p,q):
+    c = cost (w,x,b)
+    w[p][q] += h
+    
+    return (cost(w,x,b)-c)/h
+
 def softmax(y):
     '''Return the output of the softmax function for the matrix of output y. y
     is an NxM matrix where N is the number of outputs for a single case, and M
